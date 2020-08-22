@@ -19,31 +19,38 @@ public class DemoApplication {
     public static void main(String[] args) {
 
         String tokenString = createToken();
-        log("Paseto token: "+ tokenString);
+        log("Paseto token: " + tokenString);
 
         Paseto result = parseToken(tokenString);
         log("Token Claims:");
-        result.getClaims().forEach((key, value) -> log("    "+ key + ": " + value));
+        result.getClaims().forEach((key, value) -> log("    " + key + ": " + value));
 
         String audience = result.getClaims().getAudience();
-        log("Audience: "+ audience);
+        log("Audience: " + audience);
 
-        int rolledValue = result.getClaims().get("customclaim", Integer.class);
-        log("customclaim rolled: " + rolledValue);
+        int rolledValue = result.getClaims().get("custom_claim", Integer.class);
+        log("custom_claim rolled: " + rolledValue);
 
-        parseTokenWithRequirements(tokenString);
+        log("Calling parseTokenWithRequirements: ");
+        try {
+            parseTokenWithRequirements(tokenString);
+            log("Valid");
+        } catch (Exception e) {
+            log("Not valid");
+            log(e.getMessage());
+        }
     }
 
     public static String createToken() {
         Instant now = Instant.now();
 
-        return Pasetos.V1.LOCAL.builder()
+        return Pasetos.V2.LOCAL.builder()
                 .setSharedSecret(SHARED_SECRET)
                 .setIssuedAt(now)
                 .setExpiration(now.plus(1, ChronoUnit.HOURS))
-                .setAudience("blog-post")
-                .setIssuer("https://inmeta.no/blog/")
-                .claim("customclaim", new Random().nextInt(100) + 1)
+                .setAudience("my-app.com")
+                .setIssuer("devlinduldulao.com")
+                .claim("custom_claim", new Random().nextInt(100) + 1)
                 .compact();
     }
 
@@ -56,15 +63,15 @@ public class DemoApplication {
         return parser.parse(token);
     }
 
-    public static void parseTokenWithRequirements(String token) {
+    public static Paseto parseTokenWithRequirements(String token) {
         PasetoParser parser = Pasetos.parserBuilder()
                 .setSharedSecret(SHARED_SECRET)
                 .setPublicKey(KEY_PAIR.getPublic())
-                .requireAudience("blog-post")
-                .requireIssuer("https://inmeta.no/blog/")
+                .requireAudience("my-app.co")
+                .requireIssuer("devlinduldulao.com")
                 .build();
 
-        parser.parse(token);
+        return parser.parse(token);
     }
 
     private static void log(String message) {
