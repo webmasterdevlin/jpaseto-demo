@@ -63,15 +63,15 @@ public class DemoApplication {
         return parser.parse(token);
     }
 
-    public static Paseto parseTokenWithRequirements(String token) {
+    public static void parseTokenWithRequirements(String token) {
         PasetoParser parser = Pasetos.parserBuilder()
                 .setSharedSecret(SHARED_SECRET)
                 .setPublicKey(KEY_PAIR.getPublic())
-                .requireAudience("my-app.co")
+                .requireAudience("my-app.com")
                 .requireIssuer("devlinduldulao.com")
                 .build();
 
-        return parser.parse(token);
+        parser.parse(token);
     }
 
     private static void log(String message) {
